@@ -30,7 +30,6 @@ def token_required(f):
 
     return decorated
 
-
 # USER ENDPOINTS
 @app.route('/user', methods=['GET'])
 @token_required
@@ -38,7 +37,7 @@ def get_all_users(current_user):
 
     # if not admin cannot use the route
     if not current_user.admin:
-        return jsonify({"message" : "Cannot perform that function!"})
+        return jsonify({"message" : "Cannot perform that function!"}), 401
 
     users = User.query.all()
     output = []
@@ -59,11 +58,11 @@ def get_specific_user(current_user, public_id):
 
     # if not admin cannot use the route
     if not current_user.admin:
-        return jsonify({"message" : "Cannot perform that function!"})
+        return jsonify({"message" : "Cannot perform that function!"}), 401
 
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({"message": "No user found!"})
+        return jsonify({"message": "No user found!"}), 202
 
     user_data = {}
     user_data['public_id'] = user.public_id
@@ -80,7 +79,7 @@ def create_user(current_user):
 
     # if not admin cannot use the route
     if not current_user.admin:
-        return jsonify({"message" : "Cannot perform that function!"})
+        return jsonify({"message" : "Cannot perform that function!"}), 401
 
     data = request.get_json()
     hashed_password = generate_password_hash(data['password'], method='sha256')
@@ -88,7 +87,7 @@ def create_user(current_user):
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify({'message': "New user created!"}), 200
+    return jsonify({'message': "New user created!"}), 201
 
 
 @app.route('/user/<public_id>', methods=['PUT'])
@@ -97,16 +96,16 @@ def promote_user(current_user, public_id):
 
     # if not admin cannot use the route
     if not current_user.admin:
-        return jsonify({"message" : "Cannot perform that function!"})
+        return jsonify({"message" : "Cannot perform that function!"}), 401
 
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({"message": "No user found!"})
+        return jsonify({"message": "No user found!"}), 202
 
     user.admin = True
     db.session.commit()
 
-    return jsonify({"message": "The user has been promoted!"})
+    return jsonify({"message": "The user has been promoted!"}), 201
 
 
 @app.route('/user/<public_id>', methods=['DELETE'])
@@ -115,7 +114,7 @@ def delete_user(current_user, public_id):
 
     # if not admin cannot use the route
     if not current_user.admin:
-        return jsonify({"message" : "Cannot perform that function!"})
+        return jsonify({"message" : "Cannot perform that function!"}), 401
 
 
     user = User.query.filter_by(public_id=public_id).first()
@@ -134,11 +133,11 @@ def login():
 
     # if there's no auth at all or username or password return
     if not auth or not auth.username or not auth.password:
-        return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
+        return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required!"'}), 202
 
     user = User.query.filter_by(name=auth.username).first()
     if not user:
-        return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
+        return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required!"'}), 202
 
     if check_password_hash(user.password, auth.password):
         # generate token

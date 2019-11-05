@@ -1,38 +1,67 @@
-# API
-This is meant to be a template for starting new API's
+# restAPI template
+## DESCRIPTION
+- The `models` file can be found in the User class which serves as a 
+basic template. It meets all the requirements essential to get started with.
+
+- Each user has a `public_id` which is used as a `unique identifier` when querying
+the database to prevent the case when people seek to find out how many users are 
+stored in there and numerous other inconveniences.The values are generated
+by `uuid.uuid4()`.
+
+- `@token_required` makes sure that before querying the user exist and has a
+valid token. Each token is `encoded` using the `config['SECRET_KEY']` and has
+a lifespan of 30 minutes by default.
+
+- Attach the following code on the top of the defined method to make 
+the endpoint `admin-only`
+```python3
+if not current_user.admin:
+    return jsonify({"message" : "Cannot perform that function!"}), 401
+```
+
+- The encryption for passwords is done by `werkzeug.security` module 
+and the algorithm used is `sha256`
+
+
+## Template for new endpoints
+```python
+@app.route('/endpoint', methods=['GET'])
+@token_required
+def get_all_endpoints(current_user):
+    return jsonify({'endpoints' : output})
+
+
+
+@app.route('/endpoint/<endpoint_id>', methods=['GET'])
+@token_required
+def get_one_endpoint(current_user, endpoint_id):
+    return jsonify({'endpoints' : output})
+
+
+
+@app.route('/endpoint', methods=['POST'])
+@token_required
+def create_endpoint(current_user):
+    return jsonify({'message' : "endpoint created!"})
+
+
+
+@app.route('/endpoint/<endpoint_id>', methods=['PUT'])
+@token_required
+def complete_endpoint(current_user, endpoint_id):
+    return jsonify({'message' : 'endpoint item has been completed!'})
+
+
+
+@app.route('/endpoint/<endpoint_id>', methods=['DELETE'])
+def delete_endpoint(current_user, endpoint_id):
+    return jsonify({'message' : 'endpoint item deleted!'})
+```
+
 
 ## REQUIREMENTS
 - [SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)
 - [werkzeug.security](https://werkzeug.palletsprojects.com/en/0.15.x/utils/#module-werkzeug.security)
-- 
+- [uuid](https://docs.python.org/3.6/library/uuid.html)
+- [jwt](https://github.com/GehirnInc/python-jwt)
 
-## USAGE
-### GET
-###### RESPONSE 
-- `200 OK` on success
-- `404 Not Found` if object doesn't exist
-~~~
-/endpoint/get/{id}
-~~~
-Returns a specific object by id
-
-
-###### RESPONSE 
-- `200 OK` on success
-~~~
-/endpoint/get/
-~~~
-Returns all objects
-
-###  POST
-~~~
-/endpoint/post/**kwargs
-~~~
-- `201 Created` on success
-
-###  DELETE
-~~~
-/endpoint/delete/{id}
-~~~
-- `202 No Content` on success
-- `404 Not found` if there's no object with that id
