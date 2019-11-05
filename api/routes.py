@@ -35,6 +35,11 @@ def token_required(f):
 @app.route('/user', methods=['GET'])
 @token_required
 def get_all_users(current_user):
+
+    # if not admin cannot use the route
+    if not current_user.admin:
+        return jsonify({"message" : "Cannot perform that function!"})
+
     users = User.query.all()
     output = []
     for user in users:
@@ -51,6 +56,11 @@ def get_all_users(current_user):
 @app.route('/user/<public_id>', methods=['GET'])
 @token_required
 def get_specific_user(current_user, public_id):
+
+    # if not admin cannot use the route
+    if not current_user.admin:
+        return jsonify({"message" : "Cannot perform that function!"})
+
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
         return jsonify({"message": "No user found!"})
@@ -67,6 +77,11 @@ def get_specific_user(current_user, public_id):
 @app.route('/user', methods=['POST'])
 @token_required
 def create_user(current_user):
+
+    # if not admin cannot use the route
+    if not current_user.admin:
+        return jsonify({"message" : "Cannot perform that function!"})
+
     data = request.get_json()
     hashed_password = generate_password_hash(data['password'], method='sha256')
     new_user = User(public_id=str(uuid.uuid4()), name=data['name'], password=hashed_password, admin=False)
@@ -79,6 +94,11 @@ def create_user(current_user):
 @app.route('/user/<public_id>', methods=['PUT'])
 @token_required
 def promote_user(current_user, public_id):
+
+    # if not admin cannot use the route
+    if not current_user.admin:
+        return jsonify({"message" : "Cannot perform that function!"})
+
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
         return jsonify({"message": "No user found!"})
@@ -92,6 +112,12 @@ def promote_user(current_user, public_id):
 @app.route('/user/<public_id>', methods=['DELETE'])
 @token_required
 def delete_user(current_user, public_id):
+
+    # if not admin cannot use the route
+    if not current_user.admin:
+        return jsonify({"message" : "Cannot perform that function!"})
+
+
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
         return jsonify({"message": "No user found!"})
@@ -117,6 +143,7 @@ def login():
     if check_password_hash(user.password, auth.password):
         # generate token
         token = jwt.encode(
+            # the token lasts 30 minutes, eventually can be changed later on
             {'public_id': user.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
             app.config['SECRET_KEY'])
 
