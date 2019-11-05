@@ -20,4 +20,4 @@ app.config['SECRET_KEY'] = 'SEX_BOT'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from api import routes, models
+from api import api_routes, routes, models
