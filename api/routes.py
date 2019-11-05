@@ -1,12 +1,40 @@
 from api import app, db
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 from api.models import User
+import jwt
+import datetime
+from functools import wraps
+
+
+# ???
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            current_user = User.query.filter_by(public_id=data['public_id']).first()
+        except:
+            return jsonify({'message': 'Token is invalid!'}), 401
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
 
 # USER ENDPOINTS
 @app.route('/user', methods=['GET'])
-def get_all_users():
+@token_required
+def get_all_users(current_user):
     users = User.query.all()
     output = []
     for user in users:
@@ -17,13 +45,15 @@ def get_all_users():
         user_data['admin'] = user.admin
         output.append(user_data)
 
-    return jsonify({'users' : output})
+    return jsonify({'users': output})
+
 
 @app.route('/user/<public_id>', methods=['GET'])
-def get_specific_user(public_id):
+@token_required
+def get_specific_user(current_user, public_id):
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({"message" : "No user found!"})
+        return jsonify({"message": "No user found!"})
 
     user_data = {}
     user_data['public_id'] = user.public_id
@@ -31,36 +61,65 @@ def get_specific_user(public_id):
     user_data['password'] = user.password
     user_data['admin'] = user.admin
 
-    return jsonify({"user" : user_data})
+    return jsonify({"user": user_data})
 
 
 @app.route('/user', methods=['POST'])
-def create_user():
+@token_required
+def create_user(current_user):
     data = request.get_json()
     hashed_password = generate_password_hash(data['password'], method='sha256')
     new_user = User(public_id=str(uuid.uuid4()), name=data['name'], password=hashed_password, admin=False)
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify({'message' : "New user created!"}), 200
+    return jsonify({'message': "New user created!"}), 200
+
 
 @app.route('/user/<public_id>', methods=['PUT'])
-def promote_user(public_id):
+@token_required
+def promote_user(current_user, public_id):
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({"message" : "No user found!"})
+        return jsonify({"message": "No user found!"})
 
     user.admin = True
     db.session.commit()
 
-    return jsonify({"message" : "The user has been promoted!"})
+    return jsonify({"message": "The user has been promoted!"})
+
 
 @app.route('/user/<public_id>', methods=['DELETE'])
-def delete_user(public_id):
+@token_required
+def delete_user(current_user, public_id):
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({"message" : "No user found!"})
+        return jsonify({"message": "No user found!"})
 
     db.session.delete(user)
     db.session.commit()
-    return jsonify({"message" : "The user has been deleted!"})
+    return jsonify({"message": "The user has been deleted!"})
+
+
+@app.route('/login')
+def login():
+    # get the request authorization information
+    auth = request.authorization
+
+    # if there's no auth at all or username or password return
+    if not auth or not auth.username or not auth.password:
+        return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
+
+    user = User.query.filter_by(name=auth.username).first()
+    if not user:
+        return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
+
+    if check_password_hash(user.password, auth.password):
+        # generate token
+        token = jwt.encode(
+            {'public_id': user.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
+            app.config['SECRET_KEY'])
+
+        return jsonify({'token': token.decode('UTF-8')})
+
+    return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
