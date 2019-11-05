@@ -3,10 +3,10 @@ This is meant to be a template for starting new API's
 
 ## REQUIREMENTS
 - [SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)
-- [FlaskRESTful](https://flask-restful.readthedocs.io/en/latest/index.html)
-- [Flask-Marshmallow](https://flask-marshmallow.readthedocs.io/en/latest/)
+- [werkzeug.security](https://werkzeug.palletsprojects.com/en/0.15.x/utils/#module-werkzeug.security)
+- 
 
-##USAGE
+## USAGE
 ### GET
 ###### RESPONSE 
 - `200 OK` on success
