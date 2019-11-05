@@ -25,35 +25,35 @@ and the algorithm used is `sha256`
 
 ## Template for new endpoints
 ```python
-@app.route('/endpoint', methods=['GET'])
+@app.route('/api/endpoint', methods=['GET'])
 @token_required
 def get_all_endpoints(current_user):
     return jsonify({'endpoints' : output})
 
 
 
-@app.route('/endpoint/<endpoint_id>', methods=['GET'])
+@app.route('/api/endpoint/<endpoint_id>', methods=['GET'])
 @token_required
 def get_one_endpoint(current_user, endpoint_id):
     return jsonify({'endpoints' : output})
 
 
 
-@app.route('/endpoint', methods=['POST'])
+@app.route('/api/endpoint', methods=['POST'])
 @token_required
 def create_endpoint(current_user):
     return jsonify({'message' : "endpoint created!"})
 
 
 
-@app.route('/endpoint/<endpoint_id>', methods=['PUT'])
+@app.route('/api/endpoint/<endpoint_id>', methods=['PUT'])
 @token_required
 def complete_endpoint(current_user, endpoint_id):
     return jsonify({'message' : 'endpoint item has been completed!'})
 
 
 
-@app.route('/endpoint/<endpoint_id>', methods=['DELETE'])
+@app.route('/api/endpoint/<endpoint_id>', methods=['DELETE'])
 def delete_endpoint(current_user, endpoint_id):
     return jsonify({'message' : 'endpoint item deleted!'})
 ```
