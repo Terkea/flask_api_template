@@ -49,7 +49,7 @@ def create_endpoint(current_user):
 
 
 @app.route('/api/endpoint/<endpoint_id>', methods=['PUT'])
-def complete_endpoint(current_user, endpoint_id):
+def update_endpoint(current_user, endpoint_id):
     pass
 
 
@@ -59,6 +59,12 @@ def delete_endpoint(current_user, endpoint_id):
     pass
 ```
 
+| RESOURCE  | GET  | POST | PUT | DELETE
+| :-------- |-----:| ----:| ---:| -----:|
+| SUCCESS       | 200 | 201 | 401 | 200
+| UNAUTHORISED  | 401 | 401 | 401 | 401
+| ERROR         | 404 | 404 | 404 | 404
+| NOT FOUND     | 204 | 204 | 204 | 204
 
 ## REQUIREMENTS
 - [SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)

@@ -77,7 +77,7 @@ def get_all_users(current_user):
         output.append(user_data)
 
     write_log(method="GET", resource="user", request_args=None, token=request.headers['token'])
-    return jsonify({'users': output})
+    return jsonify({'users': output}), 200
 
 
 @app.route('/api/user/<public_id>', methods=['GET'])
@@ -89,12 +89,12 @@ def get_specific_user(current_user, public_id):
 
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({"message": "No user found!"}), 202
+        return jsonify({"message": "No user found!"}), 204
 
     user_data = {'public_id': user.public_id, 'name': user.name, 'password': user.password, 'admin': user.admin}
 
     write_log(method="GET", resource="user", request_args=user_data['public_id'], token=request.headers['token'])
-    return jsonify({"user": user_data})
+    return jsonify({"user": user_data}), 200
 
 
 @app.route('/api/user/', methods=['POST'])
@@ -124,7 +124,7 @@ def update_user(current_user, public_id):
 
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({"message": "No user found!"}), 202
+        return jsonify({"message": "No user found!"}), 204
 
     update_data = request.get_json()
 
@@ -158,12 +158,12 @@ def delete_user(current_user, public_id):
 
     user = User.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({"message": "No user found!"})
+        return jsonify({"message": "No user found!"}), 204
 
     db.session.delete(user)
     db.session.commit()
     write_log(method="DELETE", resource="user", request_args=public_id, token=request.headers['token'])
-    return jsonify({"message": "The user has been deleted!"})
+    return jsonify({"message": "The user has been deleted!"}), 201
 
 
 @app.route('/api/user/search', methods=['GET'])
@@ -187,5 +187,5 @@ def search_with_multiple_filters(current_user):
         output.append(user_data)
 
     write_log(method="GET", resource="user", request_args=search_filters, token=request.headers['token'])
-    return jsonify({'users': output})
+    return jsonify({'users': output}), 200
 # USER ENDPOINT END
