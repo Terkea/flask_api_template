@@ -148,7 +148,6 @@ def update_user(current_user, public_id):
 
     write_log(method="PUT", resource="user", request_args="public_id: " + public_id + ", " + json.dumps(update_data),
               token=request.headers['token'])
-    print(public_id)
     return jsonify({"message": "The user has been updated!"}), 201
 
 
