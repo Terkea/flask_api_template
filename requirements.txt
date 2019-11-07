@@ -1,3 +1,5 @@
+PyJWT
+werkzeug
 Flask
 requests
 SQLAlchemy

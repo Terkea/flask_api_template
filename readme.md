@@ -10,7 +10,7 @@ by `uuid.uuid4()`.
 
 - `@token_required` makes sure that before querying the user exist and has a
 valid token. Each token is `encoded` using the `config['SECRET_KEY']` and has
-a lifespan of 30 minutes by default.
+a lifespan of 365 days by default.
 
 - Attach the following code on the top of the defined method to make 
 the endpoint `admin-only`
@@ -61,7 +61,7 @@ def delete_endpoint(current_user, endpoint_id):
 
 ## REQUIREMENTS
 - [SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)
-- [werkzeug.security](https://werkzeug.palletsprojects.com/en/0.15.x/utils/#module-werkzeug.security)
+- [werkzeug](https://werkzeug.palletsprojects.com/en/0.15.x/utils/#module-werkzeug.security)
 - [uuid](https://docs.python.org/3.6/library/uuid.html)
-- [jwt](https://github.com/GehirnInc/python-jwt)
-
+- [PyJWT](https://github.com/GehirnInc/python-jwt)
+- [requests]()

@@ -1,5 +1,5 @@
 from api import app, db
-from flask import Flask, request, jsonify, make_response
+from flask import request, jsonify, make_response
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 from api.models import User
@@ -48,7 +48,7 @@ def api_login():
     if check_password_hash(user.password, auth.password):
         # generate token
         token = jwt.encode(
-            # the token lasts 30 minutes, eventually can be changed later on
+            # the token lasts 356 days, eventually can be changed later on
             {'public_id': user.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=356)},
             app.config['SECRET_KEY'])
 
@@ -68,14 +68,30 @@ def get_all_users(current_user):
     users = User.query.all()
     output = []
     for user in users:
-        user_data = {}
-        user_data['public_id'] = user.public_id
-        user_data['name'] = user.name
-        user_data['password'] = user.password
-        user_data['admin'] = user.admin
+        user_data = {'public_id': user.public_id, 'name': user.name, 'password': user.password, 'admin': user.admin}
         output.append(user_data)
 
     return jsonify({'users': output})
+
+
+# TODO if public_id is none return all users, else return specific user
+@app.route('/api/user/<public_id>', methods=['GET'])
+@token_required
+def get_specific_user(current_user, public_id):
+    if public_id is None:
+        # return a list of users
+        pass
+    # if not admin cannot use the route
+    if not current_user.admin:
+        return jsonify({"message": "Cannot perform that function!"}), 401
+
+    user = User.query.filter_by(public_id=public_id).first()
+    if not user:
+        return jsonify({"message": "No user found!"}), 202
+
+    user_data = {'public_id': user.public_id, 'name': user.name, 'password': user.password, 'admin': user.admin}
+
+    return jsonify({"user": user_data})
 
 
 @app.route('/api/user', methods=['POST'])
@@ -94,29 +110,10 @@ def create_user(current_user):
     return jsonify({'message': "New user created!"}), 201
 
 
-@app.route('/api/user/<public_id>', methods=['GET'])
-@token_required
-def get_specific_user(current_user, public_id):
-    # if not admin cannot use the route
-    if not current_user.admin:
-        return jsonify({"message": "Cannot perform that function!"}), 401
-
-    user = User.query.filter_by(public_id=public_id).first()
-    if not user:
-        return jsonify({"message": "No user found!"}), 202
-
-    user_data = {}
-    user_data['public_id'] = user.public_id
-    user_data['name'] = user.name
-    user_data['password'] = user.password
-    user_data['admin'] = user.admin
-
-    return jsonify({"user": user_data})
-
-
+# if the request has no value assigned it means that it doesn't want to update that field
 @app.route('/api/user/<public_id>', methods=['PUT'])
 @token_required
-def promote_user(current_user, public_id):
+def update_user(current_user, public_id):
     # if not admin cannot use the route
     if not current_user.admin:
         return jsonify({"message": "Cannot perform that function!"}), 401
@@ -125,10 +122,26 @@ def promote_user(current_user, public_id):
     if not user:
         return jsonify({"message": "No user found!"}), 202
 
-    user.admin = True
+    update_data = request.get_json()
+
+    try:
+        user.name = update_data['name']
+    except:
+        pass
+
+    try:
+        user.password = generate_password_hash(update_data['password'], method='sha256')
+    except:
+        pass
+
+    try:
+        user.admin = update_data['admin']
+    except:
+        pass
+
     db.session.commit()
 
-    return jsonify({"message": "The user has been promoted!"}), 201
+    return jsonify({"message": "The user has been updated!"}), 201
 
 
 @app.route('/api/user/<public_id>', methods=['DELETE'])
@@ -146,6 +159,7 @@ def delete_user(current_user, public_id):
     db.session.commit()
     return jsonify({"message": "The user has been deleted!"})
 
+
 @app.route('/api/search_user', methods=['GET'])
 @token_required
 def search_with_multiple_filters(current_user):
@@ -155,7 +169,7 @@ def search_with_multiple_filters(current_user):
 
     args = request.get_json()
     search_filters = {'public_id': args.get("public_id"), 'name': args.get("name"), 'password': args.get("password"),
-               'admin': args.get("admin")}
+                      'admin': args.get("admin")}
 
     users = User.query.filter(or_(User.public_id == search_filters['public_id'], User.password ==
                                   search_filters['password'], User.name == search_filters['name'],
@@ -167,5 +181,5 @@ def search_with_multiple_filters(current_user):
         output.append(user_data)
 
     return jsonify({'users': output})
-
 # USER ENDPOINTS END
+# TODO: create separate package for api with files for each endpoint also an abstract class which defines the notion of endpoint

@@ -1,5 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
 
 # DATABASE CREDENTIALS
 ENGINE = 'mysql'
@@ -18,6 +20,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = \
 
 app.config['SECRET_KEY'] = 'SEX_BOT'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
-from api import api_routes, routes, models
+migrate = Migrate(app, db)
+
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
+
+from api import api_routes, models
