@@ -9,4 +9,3 @@ class User(db.Model):
     name = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(255))
     admin = db.Column(db.Boolean)
-    sex = db.Column(db.String(80))
