@@ -31,28 +31,24 @@ write_log(method, resource, request_args, token)
 ## Template for new endpoints
 ```python
 @app.route('/api/endpoint', methods=['GET'])
-@token_required
 def get_all_endpoints(current_user):
     return jsonify({'endpoints' : output})
 
 
 
 @app.route('/api/endpoint/<endpoint_id>', methods=['GET'])
-@token_required
 def get_one_endpoint(current_user, endpoint_id):
     return jsonify({'endpoints' : output})
 
 
 
 @app.route('/api/endpoint', methods=['POST'])
-@token_required
 def create_endpoint(current_user):
     return jsonify({'message' : "endpoint created!"})
 
 
 
 @app.route('/api/endpoint/<endpoint_id>', methods=['PUT'])
-@token_required
 def complete_endpoint(current_user, endpoint_id):
     return jsonify({'message' : 'endpoint item has been completed!'})
 
