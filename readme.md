@@ -23,7 +23,7 @@ if not current_user.admin:
 and the algorithm used is `sha256`
 
 - The `api_log` table stores all the requests which have been made.
-To keep track of those changes simply call
+To keep track of those changes simply call on the endpoint method
 ```
 write_log(method, resource, request_args, token)
 ```
@@ -32,31 +32,31 @@ write_log(method, resource, request_args, token)
 ```python
 @app.route('/api/endpoint', methods=['GET'])
 def get_all_endpoints(current_user):
-    return jsonify({'endpoints' : output})
+    pass
 
 
 
 @app.route('/api/endpoint/<endpoint_id>', methods=['GET'])
 def get_one_endpoint(current_user, endpoint_id):
-    return jsonify({'endpoints' : output})
+    pass
 
 
 
 @app.route('/api/endpoint', methods=['POST'])
 def create_endpoint(current_user):
-    return jsonify({'message' : "endpoint created!"})
+    pass
 
 
 
 @app.route('/api/endpoint/<endpoint_id>', methods=['PUT'])
 def complete_endpoint(current_user, endpoint_id):
-    return jsonify({'message' : 'endpoint item has been completed!'})
+    pass
 
 
 
 @app.route('/api/endpoint/<endpoint_id>', methods=['DELETE'])
 def delete_endpoint(current_user, endpoint_id):
-    return jsonify({'message' : 'endpoint item deleted!'})
+    pass
 ```
 
 
