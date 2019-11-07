@@ -13,6 +13,7 @@ class ApiLog(db.Model):
     token = db.Column(db.String(255))
     created_date = Column(DateTime, default=datetime.datetime.utcnow)
 
+
 class User(db.Model):
     __tablename__ = 'User'
     id = db.Column(db.Integer, primary_key=True)

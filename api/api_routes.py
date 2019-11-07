@@ -1,3 +1,4 @@
+import json
 from api import app, db
 from flask import request, jsonify, make_response
 import uuid
@@ -145,7 +146,9 @@ def update_user(current_user, public_id):
 
     db.session.commit()
 
-    write_log(method="PUT", resource="user", request_args=update_data, token=request.headers['token'])
+    write_log(method="PUT", resource="user", request_args="public_id: " + public_id + ", " + json.dumps(update_data),
+              token=request.headers['token'])
+    print(public_id)
     return jsonify({"message": "The user has been updated!"}), 201
 
 
