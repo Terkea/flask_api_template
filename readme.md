@@ -1,4 +1,4 @@
-# restAPI template
+# API template
 ## DESCRIPTION
 - The `models` file can be found in the User class which serves as a 
 basic template. It meets all the requirements essential to get started with.
@@ -22,6 +22,11 @@ if not current_user.admin:
 - The encryption for passwords is done by `werkzeug.security` module 
 and the algorithm used is `sha256`
 
+- The `api_log` table stores all the requests which have been made.
+To keep track of those changes simply call
+```
+write_log(method, resource, request_args, token)
+```
 
 ## Template for new endpoints
 ```python

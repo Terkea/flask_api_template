@@ -2,14 +2,19 @@ from api import app, db
 from flask import request, jsonify, make_response
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
-from api.models import User
+from api.models import User, ApiLog
 import jwt
 import datetime
 from functools import wraps
 from sqlalchemy import or_
 
 
-# ???
+def write_log(method, resource, request_args, token):
+    log = ApiLog(method=method, resource=resource, request_args=request_args, token=token)
+    db.session.add(log)
+    db.session.commit()
+
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -32,7 +37,7 @@ def token_required(f):
     return decorated
 
 
-@app.route('/api/login')
+@app.route('/api/login/')
 def api_login():
     # get the request authorization information
     auth = request.authorization
@@ -57,8 +62,8 @@ def api_login():
     return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
 
 
-# USER ENDPOINTS
-@app.route('/api/user', methods=['GET'])
+# USER ENDPOINT
+@app.route('/api/user/', methods=['GET'])
 @token_required
 def get_all_users(current_user):
     # if not admin cannot use the route
@@ -71,16 +76,13 @@ def get_all_users(current_user):
         user_data = {'public_id': user.public_id, 'name': user.name, 'password': user.password, 'admin': user.admin}
         output.append(user_data)
 
+    write_log(method="GET", resource="user", request_args=None, token=request.headers['token'])
     return jsonify({'users': output})
 
 
-# TODO if public_id is none return all users, else return specific user
 @app.route('/api/user/<public_id>', methods=['GET'])
 @token_required
 def get_specific_user(current_user, public_id):
-    if public_id is None:
-        # return a list of users
-        pass
     # if not admin cannot use the route
     if not current_user.admin:
         return jsonify({"message": "Cannot perform that function!"}), 401
@@ -91,10 +93,11 @@ def get_specific_user(current_user, public_id):
 
     user_data = {'public_id': user.public_id, 'name': user.name, 'password': user.password, 'admin': user.admin}
 
+    write_log(method="GET", resource="user", request_args=user_data['public_id'], token=request.headers['token'])
     return jsonify({"user": user_data})
 
 
-@app.route('/api/user', methods=['POST'])
+@app.route('/api/user/', methods=['POST'])
 @token_required
 def create_user(current_user):
     # if not admin cannot use the route
@@ -107,6 +110,7 @@ def create_user(current_user):
     db.session.add(new_user)
     db.session.commit()
 
+    write_log(method="POST", resource="user", request_args=data, token=request.headers['token'])
     return jsonify({'message': "New user created!"}), 201
 
 
@@ -141,6 +145,7 @@ def update_user(current_user, public_id):
 
     db.session.commit()
 
+    write_log(method="PUT", resource="user", request_args=update_data, token=request.headers['token'])
     return jsonify({"message": "The user has been updated!"}), 201
 
 
@@ -157,10 +162,11 @@ def delete_user(current_user, public_id):
 
     db.session.delete(user)
     db.session.commit()
+    write_log(method="DELETE", resource="user", request_args=public_id, token=request.headers['token'])
     return jsonify({"message": "The user has been deleted!"})
 
 
-@app.route('/api/search_user', methods=['GET'])
+@app.route('/api/user/search', methods=['GET'])
 @token_required
 def search_with_multiple_filters(current_user):
     # if not admin cannot use the route
@@ -180,6 +186,6 @@ def search_with_multiple_filters(current_user):
         user_data = {'public_id': user.public_id, 'name': user.name, 'password': user.password, 'admin': user.admin}
         output.append(user_data)
 
+    write_log(method="GET", resource="user", request_args=search_filters, token=request.headers['token'])
     return jsonify({'users': output})
-# USER ENDPOINTS END
-# TODO: create separate package for api with files for each endpoint also an abstract class which defines the notion of endpoint
+# USER ENDPOINT END
