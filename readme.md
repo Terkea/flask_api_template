@@ -31,7 +31,7 @@ write_log(method, resource, request_args, token)
  like to tweak the database schema. To keep track of all those changes
   `flask-migrate` comes in handy. Once you update the `models.py` file run
   from the root directory.
- ```shell script
+ ```
 python migrate.py db migrate
 python migrate.py db upgrade
 ``` 
@@ -51,7 +51,7 @@ DATABASE = 'api'
 ```
 Then create the tables. _Make sure that you run those command from the root folder_
 
-~~~shell script
+~~~
 python migrate.py db init
 python migrate.py db migrate
 python migrate.py db upgrade
