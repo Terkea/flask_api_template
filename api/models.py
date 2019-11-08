@@ -21,3 +21,4 @@ class User(db.Model):
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(255))
     admin = db.Column(db.Boolean)
+    created_date = Column(DateTime, default=datetime.datetime.utcnow)

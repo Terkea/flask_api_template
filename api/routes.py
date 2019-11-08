@@ -47,7 +47,7 @@ def api_login():
     if not auth or not auth.username or not auth.password:
         return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
 
-    user = User.query.filter_by(name=auth.username).first()
+    user = User.query.filter_by(email=auth.username).first()
     if not user:
         return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required!"'})
 
@@ -74,7 +74,7 @@ def get_all_users(current_user):
     users = User.query.all()
     output = []
     for user in users:
-        user_data = {'public_id': user.public_id, 'name': user.name, 'password': user.password, 'admin': user.admin}
+        user_data = {'public_id': user.public_id, 'email': user.email, 'password': user.password, 'admin': user.admin}
         output.append(user_data)
 
     write_log(method="GET", resource="user", request_args=None, token=request.headers['token'])
@@ -92,7 +92,7 @@ def get_specific_user(current_user, public_id):
     if not user:
         return jsonify({"message": "No user found!"}), 204
 
-    user_data = {'public_id': user.public_id, 'name': user.name, 'password': user.password, 'admin': user.admin}
+    user_data = {'public_id': user.public_id, 'email': user.email, 'password': user.password, 'admin': user.admin}
 
     write_log(method="GET", resource="user", request_args=user_data['public_id'], token=request.headers['token'])
     return jsonify({"user": user_data}), 200
@@ -107,18 +107,21 @@ def create_user(current_user):
 
     data = request.get_json()
     hashed_password = generate_password_hash(data['password'], method='sha256')
-    new_user = User(public_id=str(uuid.uuid4()), name=data['name'], password=hashed_password, admin=False)
-    db.session.add(new_user)
-    db.session.commit()
+    new_user = User(public_id=str(uuid.uuid4()), email=data['email'], password=hashed_password, admin=False)
 
-    write_log(method="POST", resource="user", request_args=data, token=request.headers['token'])
-    return jsonify({'message': "New user created!"}), 201
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+        write_log(method="POST", resource="user", request_args=data, token=request.headers['token'])
+        return jsonify({'message': "New user created!"}), 201
+    except:
+        return jsonify({'message': "Error while creating new user!"}), 404
 
 
 # if the request has no value assigned it means that it doesn't want to update that field
 @app.route('/api/user/<public_id>', methods=['PUT'])
 @token_required
-def update_user(current_user, public_id):
+def update_user(current_user, public_id, *args, **kwargs):
     # if not admin cannot use the route
     if not current_user.admin:
         return jsonify({"message": "Cannot perform that function!"}), 401
@@ -130,7 +133,7 @@ def update_user(current_user, public_id):
     update_data = request.get_json()
 
     try:
-        user.name = update_data['name']
+        user.email = update_data['email']
     except:
         pass
 
@@ -144,11 +147,13 @@ def update_user(current_user, public_id):
     except:
         pass
 
-    db.session.commit()
-
-    write_log(method="PUT", resource="user", request_args="public_id: " + public_id + ", " + json.dumps(update_data),
-              token=request.headers['token'])
-    return jsonify({"message": "The user has been updated!"}), 201
+    try:
+        db.session.commit()
+        write_log(method="PUT", resource="user", request_args="public_id: " + public_id + ", " +
+                                                              json.dumps(update_data), token=request.headers['token'])
+        return jsonify({"message": "The user has been updated!"}), 201
+    except:
+        return jsonify({"message": "error while updating"}), 404
 
 
 @app.route('/api/user/<public_id>', methods=['DELETE'])
@@ -176,16 +181,16 @@ def search_with_multiple_filters(current_user):
         return jsonify({"message": "Cannot perform that function!"}), 401
 
     args = request.get_json()
-    search_filters = {'public_id': args.get("public_id"), 'name': args.get("name"), 'password': args.get("password"),
+    search_filters = {'public_id': args.get("public_id"), 'email': args.get("email"), 'password': args.get("password"),
                       'admin': args.get("admin")}
 
     users = User.query.filter(or_(User.public_id == search_filters['public_id'], User.password ==
-                                  search_filters['password'], User.name == search_filters['name'],
+                                  search_filters['password'], User.email == search_filters['email'],
                                   User.admin == search_filters['admin']))
 
     output = []
     for user in users:
-        user_data = {'public_id': user.public_id, 'name': user.name, 'password': user.password, 'admin': user.admin}
+        user_data = {'public_id': user.public_id, 'email': user.email, 'password': user.password, 'admin': user.admin}
         output.append(user_data)
 
     write_log(method="GET", resource="user", request_args=search_filters, token=request.headers['token'])
