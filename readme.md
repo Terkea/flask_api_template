@@ -29,7 +29,7 @@ write_log(method, resource, request_args, token)
 ```
 
 ## Getting started
-First of all we have to establish a connection with the database. To do so fill those fields which can be found inside `app/__init__.py`
+First of all we have to establish a connection with the database. To do so fill those fields which can be found inside `app/__init__.py` with your credentials.
 ```python
 # DATABASE CREDENTIALS
 ENGINE = 'mysql'
@@ -40,7 +40,7 @@ PORT = '3306'
 DATABASE = 'api'
 
 ```
-Then create the tables
+Then create the tables.
 
 ~~~python
 from api import *
