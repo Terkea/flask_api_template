@@ -28,6 +28,26 @@ To keep track of those changes simply call on the endpoint method
 write_log(method, resource, request_args, token)
 ```
 
+## Getting started
+First of all we have to establish a connection with the database. To do so fill those fields which can be found inside `app/__init__.py`
+```python
+# DATABASE CREDENTIALS
+ENGINE = 'mysql'
+USERNAME = 'test'
+PASSWORD = 'testtest'
+HOST = 'localhost'
+PORT = '3306'
+DATABASE = 'api'
+
+```
+Then create the tables
+
+~~~python
+from api import *
+from api.models import db
+db.create_all()
+~~~
+
 ## Template for new endpoints
 ```python
 @app.route('/api/endpoint', methods=['GET'])
