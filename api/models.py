@@ -5,7 +5,6 @@ from sqlalchemy import MetaData, Table, Column, Integer, String, DateTime
 
 
 class ApiLog(db.Model):
-    __tablename__ = 'api_log'
     id = db.Column(db.Integer, primary_key=True)
     method = db.Column(db.String(50))
     resource = db.Column(db.String(255))
@@ -15,7 +14,6 @@ class ApiLog(db.Model):
 
 
 class User(db.Model):
-    __tablename__ = 'User'
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
     email = db.Column(db.String(50), unique=True)

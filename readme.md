@@ -27,6 +27,15 @@ To keep track of those changes simply call on the endpoint method
 ```
 write_log(method, resource, request_args, token)
 ```
+- Usually during the development process, even if I know it is not ideal I
+ like to tweak the database schema. To keep track of all those changes
+  `flask-migrate` comes in handy. Once you update the `models.py` file run
+  from the root directory.
+ ```shell script
+python migrate.py db migrate
+python migrate.py db upgrade
+``` 
+
 
 ## Getting started
 First of all we have to establish a connection with the database. To do so fill those fields which can be found inside `app/__init__.py`
@@ -40,12 +49,12 @@ PORT = '3306'
 DATABASE = 'api'
 
 ```
-Then create the tables
+Then create the tables. _Make sure that you run those command from the root folder_
 
-~~~python
-from api import *
-from api.models import db
-db.create_all()
+~~~shell script
+python migrate.py db init
+python migrate.py db migrate
+python migrate.py db upgrade
 ~~~
 
 ## Template for new endpoints
@@ -88,6 +97,8 @@ def delete_endpoint(current_user, endpoint_id):
 
 ## REQUIREMENTS
 - [SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)
+- [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest/)
+- [Flask-Script](https://flask-script.readthedocs.io/en/latest/)
 - [werkzeug](https://werkzeug.palletsprojects.com/en/0.15.x/utils/#module-werkzeug.security)
 - [uuid](https://docs.python.org/3.6/library/uuid.html)
 - [PyJWT](https://github.com/GehirnInc/python-jwt)
