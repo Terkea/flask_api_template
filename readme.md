@@ -14,7 +14,7 @@ a lifespan of 365 days by default.
 
 - Attach the following code on the top of the defined method to make 
 the endpoint `admin-only`
-```python3
+```python
 if not current_user.admin:
     return jsonify({"message" : "Cannot perform that function!"}), 401
 ```
@@ -24,7 +24,7 @@ and the algorithm used is `sha256`
 
 - The `api_log` table stores all the requests which have been made.
 To keep track of those changes simply call on the endpoint method
-```
+```python
 write_log(method, resource, request_args, token)
 ```
 
