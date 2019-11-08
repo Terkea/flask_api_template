@@ -121,7 +121,7 @@ def create_user(current_user):
 # if the request has no value assigned it means that it doesn't want to update that field
 @app.route('/api/user/<public_id>', methods=['PUT'])
 @token_required
-def update_user(current_user, public_id, *args, **kwargs):
+def update_user(current_user, public_id):
     # if not admin cannot use the route
     if not current_user.admin:
         return jsonify({"message": "Cannot perform that function!"}), 401
