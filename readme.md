@@ -74,6 +74,13 @@ class Endpoint(MethodView):
     def put(self, endpoint_id):
         # update a single endpoint
         pass
+        
+endpoint_view = Endpoint.as_view('endpoint_api')
+app.add_url_rule('/endpoint/', defaults={'endpoint_id': None},
+                 view_func=endpoint_view, methods=['GET',])
+app.add_url_rule('/endpoint/', view_func=endpoint_view, methods=['POST',])
+app.add_url_rule('/endpoint/<int:endpoint_id>', view_func=endpoint_view,
+                 methods=['GET', 'PUT', 'DELETE'])        
 ```
 
 ### Easy to customize content-delivery
