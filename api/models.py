@@ -1,16 +1,7 @@
 import datetime
 
 from api import db
-from sqlalchemy import MetaData, Table, Column, Integer, String, DateTime
-
-
-class ApiLog(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    method = db.Column(db.String(50))
-    resource = db.Column(db.String(255))
-    request_args = db.Column(db.String(16000000))
-    token = db.Column(db.String(255))
-    created_date = Column(DateTime, default=datetime.datetime.utcnow)
+from sqlalchemy import Column, DateTime
 
 
 class User(db.Model):

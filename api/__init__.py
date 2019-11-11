@@ -21,4 +21,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-from api import routes, models
+from api import models
+from api.endpoints import user
+from api.endpoints.stand_alone_views import Login
