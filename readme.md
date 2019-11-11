@@ -79,19 +79,19 @@ class Endpoint(MethodView):
 ### Easy to customize content-delivery
 For example the endpoint `user GET` delivers its content as following
 ```
-        if current_user admin:
-            if public_id None:
-                all records
-            else:
-                specific record
+if current_user admin:
+    if public_id None:
+        all records
+    else:
+        specific record
+else:
+    if public_id None:
+        401
+    else:
+        if public_id represents the current user:
+            specific record
         else:
-            if public_id None:
-                401
-            else:
-                if public_id represents the current user:
-                    specific record
-                else:
-                    401       
+            401       
 ```
 ### Response for user Endpoint
 
