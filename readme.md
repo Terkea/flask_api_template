@@ -12,21 +12,9 @@ by `uuid.uuid4()`.
 valid token. Each token is `encoded` using the `config['SECRET_KEY']` and has
 a lifespan of 365 days by default.
 
-- Attach the following code on the top of the defined method to make 
-the endpoint `admin-only`
-```python3
-if not current_user.admin:
-    return jsonify({"message" : "Cannot perform that function!"}), 401
-```
-
 - The encryption for passwords is done by `werkzeug.security` module 
 and the algorithm used is `sha256`
 
-- The `api_log` table stores all the requests which have been made.
-To keep track of those changes simply call on the endpoint method
-```
-write_log(method, resource, request_args, token)
-```
 - Usually during the development process, even if I know it is not ideal I
  like to tweak the database schema. To keep track of all those changes
   `flask-migrate` comes in handy. Once you update the `models.py` file run
@@ -42,8 +30,8 @@ First of all we have to establish a connection with the database. To do so fill 
 ```python
 # DATABASE CREDENTIALS
 ENGINE = 'mysql'
-USERNAME = 'test'
-PASSWORD = 'testtest'
+USERNAME = 'name'
+PASSWORD = 'password'
 HOST = 'localhost'
 PORT = '3306'
 DATABASE = 'api'
@@ -57,36 +45,55 @@ python migrate.py db migrate
 python migrate.py db upgrade
 ~~~
 
-## Template for new endpoints
+## Endpoints
+- Each one has a [MethodView](https://flask.palletsprojects.com/en/1.1.x/views/) class file with the name of the model in `/api/endpoints`
+- Stand-alone routes are written in `endpoints/stand_alone_views`
+- After creating a new endpoint don't forget to import it in `__init__.py`
+
+
+### Template for new endpoints
 ```python
-@app.route('/api/endpoint', methods=['GET'])
-def get_all_endpoints(current_user):
-    pass
+class Endpoint(MethodView):
 
+    def get(self, endpoint_id):
+        if endpoint_id is None:
+            # return a list of endpoints
+            pass
+        else:
+            # expose a single endpoint
+            pass
 
+    def post(self):
+        # create a new user
+        pass
 
-@app.route('/api/endpoint/<endpoint_id>', methods=['GET'])
-def get_one_endpoint(current_user, endpoint_id):
-    pass
+    def delete(self, endpoint_id):
+        # delete a single endpoint
+        pass
 
-
-
-@app.route('/api/endpoint', methods=['POST'])
-def create_endpoint(current_user):
-    pass
-
-
-
-@app.route('/api/endpoint/<endpoint_id>', methods=['PUT'])
-def update_endpoint(current_user, endpoint_id):
-    pass
-
-
-
-@app.route('/api/endpoint/<endpoint_id>', methods=['DELETE'])
-def delete_endpoint(current_user, endpoint_id):
-    pass
+    def put(self, endpoint_id):
+        # update a single endpoint
+        pass
 ```
+
+### Easy to customize content-delivery
+For example the endpoint `user GET` delivers its content as following
+```
+        if current_user admin:
+            if public_id None:
+                all records
+            else:
+                specific record
+        else:
+            if public_id None:
+                401
+            else:
+                if public_id represents the current user:
+                    specific record
+                else:
+                    401       
+```
+### Response for user Endpoint
 
 | RESOURCE  | GET  | POST | PUT | DELETE
 | :-------- |-----:| ----:| ---:| -----:|
