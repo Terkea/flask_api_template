@@ -85,20 +85,42 @@ app.add_url_rule('/endpoint/<int:endpoint_id>', view_func=endpoint_view,
 
 ### Easy to customize content-delivery
 For example the endpoint `user GET` delivers its content as following
-```
-if current_user admin:
-    if public_id None:
-        all records
+```python
+current_user = self.get_user_by_token()
+
+if current_user.admin:
+    if public_id is None:
+        users = User.query.all()
+        output = []
+        for user in users:
+            user_data = {'public_id': user.public_id, 'email': user.email, 'password': user.password,
+                         'admin': user.admin}
+            output.append(user_data)
+        return jsonify({'users': output}), 200
     else:
-        specific record
+        user = User.query.filter_by(public_id=public_id).first()
+        if not user:
+            return jsonify({"message": "No user found!"}), 204
+
+        user_data = {'public_id': user.public_id, 'email': user.email, 'password': user.password,
+                     'admin': user.admin}
+
+        return jsonify({"user": user_data}), 200
 else:
-    if public_id None:
-        401
+    if public_id is None:
+        return jsonify({"message": "Cannot perform that function!"}), 401
     else:
-        if public_id represents the current user:
-            specific record
+        if current_user.public_id == public_id:
+            user = User.query.filter_by(public_id=public_id).first()
+            if not user:
+                return jsonify({"message": "No user found!"}), 204
+
+            user_data = {'public_id': user.public_id, 'email': user.email, 'password': user.password,
+                         'admin': user.admin}
+
+            return jsonify({"user": user_data}), 200
         else:
-            401       
+            return jsonify({"message": "Cannot perform that function!"}), 401    
 ```
 ### Response for user Endpoint
 
